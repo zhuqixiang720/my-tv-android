@@ -313,6 +313,8 @@ class MainFragment : BrowseSupportFragment() {
             ProgramType.F -> {
                 Request.fetchFEPG(tvViewModel)
             }
+
+            ProgramType.NONE -> {}
         }
     }
 

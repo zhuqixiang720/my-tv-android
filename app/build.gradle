@@ -69,7 +69,11 @@ android {
     }
 }
 
-static def VersionCode() {
+def versionFallback() {
+    return new groovy.json.JsonSlurper().parse(rootProject.file("version.json"))
+}
+
+def VersionCode() {
     try {
         def p = "git describe --tags --always"
         def process = p.execute()
@@ -80,17 +84,18 @@ static def VersionCode() {
         println("VersionCode $versionCode")
         return versionCode
     } catch (ignored) {
-        return 0
+        // no usable git tag (e.g. a clone without tags): use version.json
+        return versionFallback().version_code
     }
 }
 
-static def VersionName() {
+def VersionName() {
     try {
         def process = "git describe --tags --always".execute()
         process.waitFor()
         return process.text.trim() - "v"
     } catch (ignored) {
-        return "1.0.0"
+        return versionFallback().version_name - "v"
     }
 }
 
@@ -104,6 +109,9 @@ dependencies {
 
     // For HLS playback support with ExoPlayer
     implementation "androidx.media3:media3-exoplayer-hls:$media3_version"
+
+    // For DASH (.mpd) streams
+    implementation "androidx.media3:media3-exoplayer-dash:$media3_version"
 
     // 21:2.11.0 17:2.6.4
     def retrofit2_version = "2.11.0"
